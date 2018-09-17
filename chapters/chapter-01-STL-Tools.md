@@ -61,7 +61,7 @@ int main()
 从上面这个代码中，我们不难推测出一些关于 `pair` 简单的特性。
 
 * `pair` 是一个仅包含**两个元素**的一个模板类，使用时需要通过**显式**的声明或者**隐式**的推导对其进行模板特化，从而制造出我们需要的特定类型，换言之，任何的类型推导错误都会导致其出现编译时错误；
-* `pair` 只包含两个数据成员，分别是 `first` 与 `second`，其类型和数据值按照声明时的**代码书写顺序**依次对应，注意到这个顺序并非我们所熟悉的**C++中函数参数压栈**顺序；
+* `pair` 只包含两个数据成员，分别是 `first` 与 `second`，其类型和数据值按照声明时的**代码书写顺序**依次对应；
 * `auto` 在进行类型推导时会默认使用**基础类型**，而非指针与引用，只有在初始化时使用了显式的引用（如 `std::ref()`）时才会将类型变更为引用类型。
 
 在有以上思考的基础上，我们就不难阅读 `pair` 的定义声明了。
@@ -371,9 +371,151 @@ get<2>(student2) += 1000 => [1117, 1117, 1117]
 
 为了验证我们的这一结论，我们接着看下一个例子
 
+```cpp
+#include <iostream>
+#include <string>
+#include <tuple>
+#include <type_traits>
+#include <functional>
 
+using namespace std;
 
+void display_separator() { cout << "--------" << endl; }
 
+int main()
+{
+    string names[4] = { "alice", "bob", "carl", "dell" };
+    char ranks[4] = { 'A', 'B', 'C', 'D' };
+    int score[4] = { 5, 6, 7, 8 };
+
+    cout << std::boolalpha;
+
+    int hoge;
+    auto student0 = tie(names[0], ranks[0], score[0]);
+    // => name: bob, rank: B, score: 6
+    tie(std::ignore, std::ignore, hoge) = student0;
+    cout << "0> " << std::is_same<int, decltype(hoge)>::value;
+    cout << ", " << std::is_same<int&, decltype(hoge)>::value << endl;
+    
+    display_separator();
+
+    auto student1 = make_tuple(names[1], ranks[1], score[1]);
+    // => name: carl, rank: C, score: 7
+    auto [_1, _2, piyo] = student1;
+    cout << "1> " << std::is_same<int, decltype(piyo)>::value;
+    cout << ", " << std::is_same<int&, decltype(piyo)>::value << endl;
+    
+    display_separator();
+
+    auto student2 = tie(names[2], ranks[2], score[2]);
+    // => name: carl, rank: C, score: 7
+    auto [_3, _4, fuga] = student2;
+    cout << "2> " << std::is_same<int, decltype(fuga)>::value;
+    cout << ", " << std::is_same<int&, decltype(fuga)>::value << endl;
+    
+    display_separator();
+    
+    auto student3 = make_tuple(names[2], ranks[2], std::ref(score[2]));
+    // => name: carl, rank: C, score: 7
+    auto [_5, _6, pika] = student3;
+    cout << "3> " << std::is_same<int, decltype(pika)>::value;
+    cout << ", " << std::is_same<int&, decltype(pika)>::value << endl;
+    
+    display_separator();
+
+    cout << "bonus> "
+         << std::is_same<int&, decltype(std::get<2>(student0))>::value << ", "
+         << std::is_same<int&, decltype(std::get<2>(student1))>::value << endl;
+    return 0;
+}
+
+// filename: ch1-tuple-example-4.cpp
+// compile this> g++ ch1-tuple-example-4.cpp -o ch1-tuple-example-4.exe -std=c++17
+```
+
+这份代码的运行结果如下所示：
+
+```plain
+0> true, false
+--------
+1> true, false
+--------
+2> false, true
+--------
+3> false, true
+--------
+bonus> true, true
+```
+
+和之前类似，我们继续来逐行解析这份代码：
+
+* 这个例子我们使用了 C++11 所提供的类型判别机制，这个机制作用在编译期，`std::is_same<U, V>` 判断类型 `U` 和 `V` 是否为同一类型，`decltype()` 则是在编译时解析类型，借助这一套工具我们就能很简单的判断目标变量的具体类型是什么了；
+* 第 52-54 行测试了 `std::get()` 的返回类型，注意到不管元组是如何构造的，`std::get()` 的返回类型永远是引用类型，原因是他的返回值不仅可以作为右值进行计算，也可以作为左值进行赋值并且改变其在 `tuple` 中的值，那么在设计上自然需要将其的返回类型设置为一个引用类型；
+* 第 19-24 行测试了 `std::tie()` 解包时所解包数据 `hoge` 的返回类型，由于一开始已经声明 `hoge` 为 `int`，所以自然会在判断是否为 `int` 时返回 `ture`;
+* 第 28-32 行测试了通过 `std::make_tuple()` 创建的元组在 `auto [_1, _2, piyo]` 解包是的表现，注意到 `piyo` 和上面的例子中的表现相同，这是由于 `std::make_tuple()` 并不会创建引用，所以导致了后续操作里不会出现引用类型了；
+* 第 36-40 行测试了通过 `std::tie()` 创建的元组的解包表现，注意到由于 `std::tie()` 创建的是引用，所以后续解包时产生的变量也是引用；
+* 第 44-48 行测试了显式构造引用类型的数据的解包表现，根据前面的分析我们不难理解其结果。
+
+最后我们总结一下关于元组的目前已经解析的信息：
+
+* `std::make_tuple()` 以及 `std::tie()` 均可以构造一个 `tuple`，两者的区别在于前者构造复制，后者创建引用，更准确的说法是后者创建一个**左值引用**；
+* `std::get()` 会解包出来固定位置的值，其返回值是元组内部值的引用；
+* `std::tie()` 会解包出来该元组的所有值，不需要的位置可以用占位符 `std::ignore` 代替，解包数据的数据类型是基本类型而非引用类型；
+* C++17 引入的 structured binding 方法 `auto [_1, _2, _3, ...]` 在解包时的表现与 `std::tie()` 类似。
+
+与 `pair` 类似，`tuple` 提供了一种更为简便的包装数据的方法，和 `pair` 一样不限制所包装的数据的类型，同时不限制所包装的数据的个数。我们甚至可以把它看做一个特殊的列表。基于这样的认识，我们再来认识这三个工具 `std::tuple_cat()`，`std::tuple_size()` 以及 `std::tuple_element`。注意，以下内容均在不同程度上涉及了模板编程的知识，初学者可以先行放弃待积累了一定的模板编程经验之后再重新学习本小节的知识。
+
+我们先给自己设置一个目标，实现两个元组的拼接操作。拼接其实并不难，因为如果已知两个元组内部的元素之后只需要提取出来然后 `std::make_tuple()` 就行了。这个问题的难点就在于，由于 C++ 要求所有的变量类型必须在编译时声明，所以如果要实现两个元组的拼接就需要对它们分别进行解包操作，同时还需要声明数据类型。所以现在我们关注这样一个问题，给定一个元组，能否实现以下的三种操作：自动解包，得到元组内部元素的个数，得到确定某一元素的数据类型。这时需要注意，刚刚所提到的三种操作实际上只是一种操作。得到元组内部元素的个数，等价于自动解包时把元组内部的每一个元素都看作自然数 1 然后把解包操作修改为自然数的加法。而得到确定某一元素的数据类型则更为方便，我们只需要在某一个位置上应用一次 `decltype` 就大功告成了。所以基于以上的思路，我们的任务只有一个，就是如何自动分解元组。
+
+这里一种很简单的方法就是递归处理，每一次把当前元组分解为两部分，当前元祖的头部（第一个元素）和剩余部分，之后再对剩余部分进行处理，直到剩余部分是一个只包含一个元素的元组为止。基于这一思路，我们可以写出下面所示的简单代码。
+
+```cpp
+#include <iostream>
+#include <string>
+#include <tuple>
+
+template<class Func, class Tuple, int N>
+struct TupleHelper
+{
+    static void func(Func f, const Tuple &_)
+    {
+        TupleHelper<Func, Tuple, N - 1>::func(f, _);
+        f(std::get<N - 1>(_));
+    }
+};
+
+template<class Func, class Tuple>
+struct TupleHelper<Func, Tuple, 1>
+{
+    static void func(Func f, const Tuple &_)
+    {
+        f(std::get<0>(_));
+    }
+};
+
+template<class Func, class ...Args>
+void manipulate_tuple(Func f, const std::tuple<Args...> &_)
+{
+    TupleHelper<Func, decltype(_), sizeof...(Args)>::func(f, _);
+}
+
+int main()
+{
+    manipulate_tuple([](auto _){ std::cout << " " << _; },
+                     std::make_tuple(10, 1.5, 'A'));
+    // => 10 1.5 A
+    return 0;
+}
+
+// filename: ch1-tuple-helper.cpp
+// compile this> g++ ch1-tuple-helper.cpp -o ch1-tuple-helper.exe -std=c++14
+```
+
+在这份代码中，我们实现了一个对 `tuple` 内部的所有元素都进行一次操作的 `TupleHelper` 工具，并且对只包含一个元素的 `tuple` 进行了模板特化。另外我们还将 `TupleHelper` 封装到了 函数 `manipulate_tuple` 当中，利用 `decltype` 和变长模板参数获取 `tuple` 的内部所有元素的个数。一切准备就绪之后就交给编译器处理就行了，所有的类型声明均在编译时处理完毕。
+
+既然了解了如何自动解包，那么我们完全可以独立的借助刚才的组件自行开发一个完成 `tuple` 合并操作的工具。不过，如果你已经充分理解了这个操作，你完全可以开始使用标准库所提供的三个组件 `std::tuple_cat()`，`std::tuple_size()` 以及 `std::tuple_element` 来构建自己的程序。
+
+TODO
 
 ## 基础序列式容器 `vector`
 
