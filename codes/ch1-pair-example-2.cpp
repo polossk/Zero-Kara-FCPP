@@ -6,7 +6,7 @@
 using namespace std;
 
 template<class T1, class T2>
-ostream& operator<<(ostream& out, const pair<T1, T2> &_)
+ostream& operator<<(ostream &out, const pair<T1, T2> &_)
 {
     return out << "(" << _.first << ", " << _.second << ")";
 }
