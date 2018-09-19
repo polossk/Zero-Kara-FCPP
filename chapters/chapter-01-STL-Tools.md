@@ -559,7 +559,7 @@ struct TupleHelper<Func, Tuple, 1>
 template<class Func>
 void manipulate_tuple(Func f, const std::tuple<> &_)
 {
-    std::cout << "Warning! Manipulating an EMPTY tuple.";
+    std::cerr << "Warning! Manipulating an EMPTY tuple.";
 };
 
 template<class Func, class ...Args>
