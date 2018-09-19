@@ -723,7 +723,7 @@ int main()
 // compile this> g++ ch1-tuple-init-and-last.cpp -o ch1-tuple-init-and-last.exe -std=c++14
 ```
 
-最后给一个思考题，如果我把上一份代码中 `last2()` 的实现写作
+最后给一个思考题，如果我把上一份代码中 `last2()` 的实现写做
 
 ```cpp
 template <class T> auto last2(T t)
