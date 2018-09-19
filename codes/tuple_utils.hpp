@@ -1,6 +1,8 @@
-#include <iostream>
-#include <string>
-#include <tuple>
+// filename: tuple_utils.hpp
+#ifndef __TUPLE_UTILS_HPP__
+#define __TUPLE_UTILS_HPP__
+
+namespace __utils{
 
 template<class Func, class Tuple, int N>
 struct TupleHelper
@@ -19,6 +21,12 @@ struct TupleHelper<Func, Tuple, 1>
     {
         f(std::get<0>(_), 0);
     }
+};
+
+template<class Func>
+void manipulate_tuple(Func f, const std::tuple<> &_)
+{
+    std::cout << "Warning! Manipulating an EMPTY tuple.";
 };
 
 template<class Func, class ...Args>
@@ -40,11 +48,5 @@ void print_tuple(const std::tuple<Args...> &_)
     std::cout << ")";
 }
 
-int main()
-{
-    print_tuple(std::make_tuple(10, 1.5, 'A'));
-    // => (10, 1.5, A)
-    return 0;
-}
-// filename: ch1-tuple-helper.cpp
-// compile this> g++ ch1-tuple-helper.cpp -o ch1-tuple-helper.exe -std=c++14
+} // namespace __utils
+#endif // __TUPLE_UTILS_HPP__

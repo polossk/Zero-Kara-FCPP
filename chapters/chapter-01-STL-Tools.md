@@ -465,7 +465,9 @@ bonus> true, true
 
 与 `pair` 类似，`tuple` 提供了一种更为简便的包装数据的方法，和 `pair` 一样不限制所包装的数据的类型，同时不限制所包装的数据的个数。我们甚至可以把它看做一个特殊的列表。基于这样的认识，我们再来认识这三个工具 `std::tuple_cat()`，`std::tuple_size()` 以及 `std::tuple_element`。注意，以下内容均在不同程度上涉及了模板编程的知识，初学者可以先行放弃待积累了一定的模板编程经验之后再重新学习本小节的知识。
 
-我们先给自己设置一个目标，实现两个元组的拼接操作。拼接其实并不难，因为如果已知两个元组内部的元素之后只需要提取出来然后 `std::make_tuple()` 就行了。这个问题的难点就在于，由于 C++ 要求所有的变量类型必须在编译时声明，所以如果要实现两个元组的拼接就需要对它们分别进行解包操作，同时还需要声明数据类型。所以现在我们关注这样一个问题，给定一个元组，能否实现以下的三种操作：自动解包，得到元组内部元素的个数，得到确定某一元素的数据类型。这时需要注意，刚刚所提到的三种操作实际上只是一种操作。得到元组内部元素的个数，等价于自动解包时把元组内部的每一个元素都看作自然数 1 然后把解包操作修改为自然数的加法。而得到确定某一元素的数据类型则更为方便，我们只需要在某一个位置上应用一次 `decltype` 就大功告成了。所以基于以上的思路，我们的任务只有一个，就是如何自动分解元组。
+### 以下内容初学者可跳过
+
+首先转变观念，把 `tuple` 看做一种特殊的要求每一个元素的数据类型的不定长列表。基于这样的考虑，我们先给自己设置一个目标，实现两个元组的拼接操作。拼接其实并不难，因为如果已知两个元组内部的元素之后只需要提取出来然后 `std::make_tuple()` 就行了。这个问题的难点就在于，由于 C++ 要求所有的变量类型必须在编译时声明，所以如果要实现两个元组的拼接就需要对它们分别进行解包操作，同时还需要声明数据类型。所以现在我们关注这样一个问题，给定一个元组，能否实现以下的三种操作：自动解包，得到元组内部元素的个数，得到确定某一元素的数据类型。这时需要注意，刚刚所提到的三种操作实际上只是一种操作。得到元组内部元素的个数，等价于自动解包时把元组内部的每一个元素都看作自然数 1 然后把解包操作修改为自然数的加法。而得到确定某一元素的数据类型则更为方便，我们只需要在某一个位置上应用一次 `decltype` 就大功告成了。所以基于以上的思路，我们的任务只有一个，就是如何自动分解元组。
 
 这里一种很简单的方法就是递归处理，每一次把当前元组分解为两部分，当前元祖的头部（第一个元素）和剩余部分，之后再对剩余部分进行处理，直到剩余部分是一个只包含一个元素的元组为止。基于这一思路，我们可以写出下面所示的简单代码。
 
@@ -480,7 +482,7 @@ struct TupleHelper
     static void func(Func f, const Tuple &_)
     {
         TupleHelper<Func, Tuple, N - 1>::func(f, _);
-        f(std::get<N - 1>(_));
+        f(std::get<N - 1>(_), N - 1);
     }
 };
 
@@ -489,7 +491,7 @@ struct TupleHelper<Func, Tuple, 1>
 {
     static void func(Func f, const Tuple &_)
     {
-        f(std::get<0>(_));
+        f(std::get<0>(_), 0);
     }
 };
 
@@ -499,23 +501,238 @@ void manipulate_tuple(Func f, const std::tuple<Args...> &_)
     TupleHelper<Func, decltype(_), sizeof...(Args)>::func(f, _);
 }
 
-int main()
+template<class ...Args>
+void print_tuple(const std::tuple<Args...> &_)
 {
-    manipulate_tuple([](auto _){ std::cout << " " << _; },
-                     std::make_tuple(10, 1.5, 'A'));
-    // => 10 1.5 A
-    return 0;
+    std::cout << "(";
+    manipulate_tuple(
+        [](auto _, std::size_t idx)
+        {
+            if (idx != 0) std::cout << ", ";
+            std::cout << _;
+        }, _);
+    std::cout << ")";
 }
 
+int main()
+{
+    print_tuple(std::make_tuple(10, 1.5, 'A'));
+    // => (10, 1.5, A)
+    return 0;
+}
 // filename: ch1-tuple-helper.cpp
 // compile this> g++ ch1-tuple-helper.cpp -o ch1-tuple-helper.exe -std=c++14
 ```
 
-在这份代码中，我们实现了一个对 `tuple` 内部的所有元素都进行一次操作的 `TupleHelper` 工具，并且对只包含一个元素的 `tuple` 进行了模板特化。另外我们还将 `TupleHelper` 封装到了 函数 `manipulate_tuple` 当中，利用 `decltype` 和变长模板参数获取 `tuple` 的内部所有元素的个数。一切准备就绪之后就交给编译器处理就行了，所有的类型声明均在编译时处理完毕。
+在这份代码中，我们实现了一个对 `tuple` 内部的所有元素都进行一次 `Func` 操作的 `TupleHelper` 工具。在第 5 行的模板声明中， `class Func` 被假设为一个接受元组内元素和所在位置 `idx` 这两个参数的函数类型，`int N` 则表示这个元组的长度。在这里我们使用的是递归处理的方法，所以在第 15-22 行我们对模板进行了特化处理。另外我们还将 `TupleHelper` 封装到了函数 `manipulate_tuple` 当中，利用 `decltype` 获取元组的具体类型，用变长模板参数获取 `tuple` 的内部所有元素的个数。一切准备就绪之后就交给编译器处理就行了，因为模板的所有操作都是在编译时完成的。注意这个 `TupleHelper` 并不是 bug free 的，因为没有处理空元组 `tuple<>` 的情况，具体怎么修改就仁者见仁智者见智了。
 
-既然了解了如何自动解包，那么我们完全可以独立的借助刚才的组件自行开发一个完成 `tuple` 合并操作的工具。不过，如果你已经充分理解了这个操作，你完全可以开始使用标准库所提供的三个组件 `std::tuple_cat()`，`std::tuple_size()` 以及 `std::tuple_element` 来构建自己的程序。
+既然了解了如何自动解包，那么我们完全可以独立的借助刚才的组件自行开发一个完成 `tuple` 合并操作的工具。不过，如果你已经充分理解了借助模板来递归分解元组的这个操作，你完全可以开始使用标准库所提供的三个组件 `std::tuple_cat()`，`std::tuple_size()` 以及 `std::tuple_element` 来构建自己的程序，因为事到如今你自己就会感慨，这三者的实现并不见得会有多么高深莫测。
 
-TODO
+让我们回到上一份例子中，为了简便起见我们把上一份代码的第 5-41 行封装进 `tuple_utils.hpp` 当中，同时包装到命名空间 `__utils` 以防止与之后的内容混淆。封装后的代码如下：
+
+```cpp
+// filename: tuple_utils.hpp
+#ifndef __TUPLE_UTILS_HPP__
+#define __TUPLE_UTILS_HPP__
+
+namespace __utils{
+
+template<class Func, class Tuple, int N>
+struct TupleHelper
+{
+    static void func(Func f, const Tuple &_)
+    {
+        TupleHelper<Func, Tuple, N - 1>::func(f, _);
+        f(std::get<N - 1>(_), N - 1);
+    }
+};
+
+template<class Func, class Tuple>
+struct TupleHelper<Func, Tuple, 1>
+{
+    static void func(Func f, const Tuple &_)
+    {
+        f(std::get<0>(_), 0);
+    }
+};
+
+template<class Func>
+void manipulate_tuple(Func f, const std::tuple<> &_)
+{
+    std::cout << "Warning! Manipulating an EMPTY tuple.";
+};
+
+template<class Func, class ...Args>
+void manipulate_tuple(Func f, const std::tuple<Args...> &_)
+{
+    TupleHelper<Func, decltype(_), sizeof...(Args)>::func(f, _);
+}
+
+template<class ...Args>
+void print_tuple(const std::tuple<Args...> &_)
+{
+    std::cout << "(";
+    manipulate_tuple(
+        [](auto _, std::size_t idx)
+        {
+            if (idx != 0) std::cout << ", ";
+            std::cout << _;
+        }, _);
+    std::cout << ")";
+}
+
+} // namespace __utils
+#endif // __TUPLE_UTILS_HPP__
+```
+
+在拥有了一个封装好的工具盒之后，我们来看看标准库所提供的剩下的三个工具的作用。
+
+```cpp
+#include <iostream>
+#include <tuple>
+#include <utility>
+
+#include "tuple_utils.hpp"
+
+int main()
+{
+    auto t1 = std::make_tuple(10, "abc", 'B', 32);
+    int n = 11;
+    auto t2 = std::make_tuple("bcd", 'C', 64);
+    auto t3 = std::tuple_cat(t1, std::tie(n), t2, std::make_pair("abc", "def"));
+    n = 16;
+    __utils::print_tuple(t3); std::cout << std::endl;
+    // => (10, abc, B, 32, 16, bcd, C, 64, abc, def)
+
+    std::cout << std::tuple_size<decltype(t3)>::value << std::endl;
+    // => 10
+
+    std::tuple_element<1, decltype(t3)>::type hoge = "test";
+    std::cout << hoge << std::endl; // => "test"
+
+    std::tuple<> t_empty;
+    __utils::print_tuple(t_empty);
+    // => (Warning! Manipulating an EMPTY tuple.)
+    return 0;
+}
+
+// filename: ch1-tuple-tools.cpp
+// compile this> g++ ch1-tuple-tools.cpp -o ch1-tuple-tools.exe -std=c++14
+```
+
+第 12 行测试了 `std::tuple_cat()` 方法，该方法会合并多个 `tuple` 同时保持他们的引用关系。那么既然要保持内部的引用关系，想必在解包时传递的参数应当是一个左值，这样就保证了后续的引用操作依旧有效。第 17 行和第 19 行测试了 `std::tuple_size()` 和 `std::tuple_element()` 方法，分别获取元组内部数据的个数以及指定位置数据类型。注意到这两个方法都是在**编译时**生效的，所以相比较于 `python` 的列表还是逊色了不少。代码的第 23 行测试了我们的 `__utils::print_tuple()` 面对空 `tuple` 的处理方法，对应的代码在 `tuple_utils.hpp` 的第 26-30 行。
+
+既然已经把 `tuple` 看做一种列表了，那我们索性把超纲进行到底。初学 Haskell 的时候大家都遇见过关于列表的四个函数，函数 `head` 返回列表的头部，也就是第一个元素，`tail` 返回列表除去头部的剩下部分，`last` 返回列表的最后一个元素，`init` 返回列表除去最后一个元素的剩余部分。
+
+```haskell
+head [5, 4, 3, 2, 1] -- => 5
+tail [5, 4, 3, 2, 1] -- => [4, 3, 2, 1]
+init [5, 4, 3, 2, 1] -- => [5, 4, 3, 2]
+last [5, 4, 3, 2, 1] -- => 1
+```
+
+那么如何用 C++ 来实现这四种功能呢？第一种方法就是我们之前提到的递归分解，把大化小，最后在组装回去。不过，如果对变长模板更熟悉一些，我们可以直接在编译期做更多的事情。我们先来看一下 `head` 与 `tail` 这两个函数的实现：
+
+```cpp
+#include <iostream>
+#include <tuple>
+#include <utility>
+
+#include "tuple_utils.hpp"
+
+template<typename T, typename ...Ts>
+auto head(std::tuple<T, Ts...> t)
+{
+    return std::get<0>(t);
+}
+
+template<std::size_t ...Ns, typename ...Ts>
+auto tail_impl(std::index_sequence<Ns...>, std::tuple<Ts...> t)
+{
+    return std::make_tuple(std::get<Ns + 1u>(t)...);
+}
+
+template <typename ...Ts>
+auto tail(std::tuple<Ts...> t)
+{
+    return tail_impl(std::make_index_sequence<sizeof...(Ts) - 1u>() , t);
+}
+
+int main()
+{
+    auto t = std::make_tuple(2, 3.14, 'c');
+    std::cout << head(t) << std::endl; // => 2
+    __utils::print_tuple(tail(t)); std::cout << std::endl; // => (3.14, 'c')
+    return 0;
+}
+
+// filename: ch1-tuple-head-and-tail.cpp
+// compile this> g++ ch1-tuple-head-and-tail.cpp -o ch1-tuple-head-and-tail.exe -std=c++14
+```
+
+这份代码中我们又借助了一个强大的 C++14 的**编译时**工具 `std::index_sequence`，它表示一串只在**编译期**生效的整数数列。不过一般而言更常用的是 `std::make_index_sequence`，他会在**编译期**生成一串 `0, 1, 2, ...` 这样的数列，这样就更加方便了我们对 `tuple` 的读写操作。比如我们现在需要实现 `tail` 函数的操作，除了第一项以外把剩下的 N-1 个数据返回成 `tuple`，我们就可以先用 `std::make_index_sequence` 制造一个长度为 N-1 的 `0, 1, 2, ...` 数列，然后对每一项 +1 就正好对应上了我们所要的剩下的元素的位置，最后用 `std::get()` 获取元素，顺便在外层包装上 `std::make_tuple()` 即可。既然已经看到了 `std::make_index_sequence` 这个工具，那么就不妨来试一下实现 `init` 和 `last` 函数吧。
+
+```cpp
+#include <iostream>
+#include <tuple>
+#include <utility>
+
+#include "tuple_utils.hpp"
+
+template<std::size_t ...Ns, typename ...Ts>
+auto init_impl(std::index_sequence<Ns...>, std::tuple<Ts...> t)
+{
+    return std::make_tuple(std::get<Ns>(t)...);
+}
+
+template<typename ...Ts>
+auto init(std::tuple<Ts...> t)
+{
+    return init_impl(std::make_index_sequence<sizeof...(Ts) - 1u>() , t);
+}
+
+template<typename ...Ts>
+auto last(std::tuple<Ts...> t)
+{
+    return std::get<sizeof...(Ts) - 1u>(t);
+}
+
+template <class T>
+auto size(T t)
+{
+    return std::tuple_size<T>::value;
+}
+
+template <class T>
+auto last2(T t)
+{
+    return std::get<std::tuple_size<T>::value - 1u>(t);
+}
+
+int main()
+{
+    auto t = std::make_tuple(2, 3.14, 'c');
+    std::cout << size(t) << std::endl; // => 3
+    std::cout << last(t) << std::endl; // => 'c'
+    std::cout << last2(t) << std::endl; // => 'c'
+    __utils::print_tuple(init(t)); std::cout << std::endl; // => (2, 3.14)
+    return 0;
+}
+
+// filename: ch1-tuple-init-and-last.cpp
+// compile this> g++ ch1-tuple-init-and-last.cpp -o ch1-tuple-init-and-last.exe -std=c++14
+```
+
+最后给一个思考题，如果我把上一份代码中 `last2()` 的实现写作
+
+```cpp
+template <class T> auto last2(T t)
+{
+    return std::get<size<T>(t) - 1u>(t);
+}
+```
+
+这份代码能运行吗？为什么？
 
 ## 基础序列式容器 `vector`
 
