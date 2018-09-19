@@ -1,7 +1,5 @@
-从零开始的简单函数式C++（二）tuple
+包装多个数据的元组 `tuple`
 ========================================
-
-## 包装多个数据的元组 `tuple`
 
 既然两个元素可以用 `pair` 来包装到一起，那么更多的元素能不能用一种类似的数据结构包装在一起呢？这便是更一般的元组 `tuple` 的设计初衷，可以把多个不同数据类型的数据绑定到一个实例上。比如现在我们手上有这三种数据，学生的名字、平时表现评级以及期末考试成绩，那么我们就可以选择使用 `tuple` 来操作我们的数据。具体而言请参考如以下代码所示。
 
@@ -13,28 +11,28 @@
 
 int main()
 {
-    std::string names[3] = { "alice", "bob", "carl" };
-    char ranks[3] = { 'A', 'B', 'C' };
-    int score[3] = { 5, 6, 7 };
+	std::string names[3] = { "alice", "bob", "carl" };
+	char ranks[3] = { 'A', 'B', 'C' };
+	int score[3] = { 5, 6, 7 };
 
-    auto student0 = std::make_tuple(names[0], ranks[0], score[0]);
-    std::cout << "student0> name: " << std::get<0>(student0)
-              << ", rank: " << std::get<1>(student0)
-              << ", score: " << std::get<2>(student0) << std::endl;
+	auto student0 = std::make_tuple(names[0], ranks[0], score[0]);
+	std::cout << "student0> name: " << std::get<0>(student0)
+			  << ", rank: " << std::get<1>(student0)
+			  << ", score: " << std::get<2>(student0) << std::endl;
 
-    std::string hoge;
-    char piyo;
-    int fuga;
-    auto student1 = std::make_tuple(names[1], ranks[1], score[1]);
-    std::tie(hoge, piyo, fuga) = student1;
-    std::cout << "student1> name: " << hoge << ", rank: " << piyo
-              << ", score: " << fuga << std::endl;
+	std::string hoge;
+	char piyo;
+	int fuga;
+	auto student1 = std::make_tuple(names[1], ranks[1], score[1]);
+	std::tie(hoge, piyo, fuga) = student1;
+	std::cout << "student1> name: " << hoge << ", rank: " << piyo
+			  << ", score: " << fuga << std::endl;
 
-    auto student2 = std::tie(names[2], ranks[2], score[2]);
-    auto [a, b, c] = student2; // C++17 structured binding
-    std::cout << "student2> name: " << a << ", rank: " << b
-              << ", score: " << c << std::endl;
-    return 0;
+	auto student2 = std::tie(names[2], ranks[2], score[2]);
+	auto [a, b, c] = student2; // C++17 structured binding
+	std::cout << "student2> name: " << a << ", rank: " << b
+			  << ", score: " << c << std::endl;
+	return 0;
 }
 
 // filename: ch1-tuple-example-1.cpp
@@ -55,31 +53,31 @@ using namespace std;
 template<class T1, class T2>
 ostream& operator<<(ostream &out, const pair<T1, T2> &_)
 {
-    return out << "(" << _.first << ", " << _.second << ")";
+	return out << "(" << _.first << ", " << _.second << ")";
 }
 
 void display_separator() { cout << "--------" << endl; }
 
 int main()
 {
-    string name = "alice";
-    char rank = 'A';
-    int score = 5;
+	string name = "alice";
+	char rank = 'A';
+	int score = 5;
 
-    auto student = make_tuple(name, rank, score);
-    // => name: alice, rank: A, score: 5
-    cout << "student> name: " << get<0>(student)
-              << ", rank: " << get<1>(student)
-              << ", score: " << get<2>(student) << endl;
-    cout << "Here, (score, get<2>(student)) is "
-         << make_pair(score, get<2>(student)) << endl;
-    score += 10;
-    cout << "        score   +=  10 => "
-         << make_pair(score, get<2>(student)) << endl;
-    get<2>(student) += 100;
-    cout << "get<2>(student) += 100 => "
-         << make_pair(score, get<2>(student)) << endl;
-    return 0;
+	auto student = make_tuple(name, rank, score);
+	// => name: alice, rank: A, score: 5
+	cout << "student> name: " << get<0>(student)
+			  << ", rank: " << get<1>(student)
+			  << ", score: " << get<2>(student) << endl;
+	cout << "Here, (score, get<2>(student)) is "
+		 << make_pair(score, get<2>(student)) << endl;
+	score += 10;
+	cout << "        score   +=  10 => "
+		 << make_pair(score, get<2>(student)) << endl;
+	get<2>(student) += 100;
+	cout << "get<2>(student) += 100 => "
+		 << make_pair(score, get<2>(student)) << endl;
+	return 0;
 }
 
 // filename: ch1-tuple-example-2.cpp
@@ -91,7 +89,7 @@ int main()
 ```plain
 student> name: alice, rank: A, score: 5
 Here, (score, get<2>(student)) is (5, 5)
-        score   +=  10 => (15, 5)
+		score   +=  10 => (15, 5)
 get<2>(student) += 100 => (15, 105)
 ```
 
@@ -111,74 +109,74 @@ using namespace std;
 template<class T1, class T2>
 ostream& operator<<(ostream &out, const pair<T1, T2> &_)
 {
-    return out << "(" << _.first << ", " << _.second << ")";
+	return out << "(" << _.first << ", " << _.second << ")";
 }
 
 template<class T1, class T2, class T3>
 ostream& operator<<(ostream &out, const tuple<T1, T2, T3> &_)
 {
-    auto [_1, _2, _3] = _;
-    return out << "[" << _1 << ", " << _2 << ", " << _3 << "]";
+	auto [_1, _2, _3] = _;
+	return out << "[" << _1 << ", " << _2 << ", " << _3 << "]";
 }
 
 void display_separator() { cout << "--------" << endl; }
 
 int main()
 {
-    string names[3] = { "alice", "bob", "carl" };
-    char ranks[3] = { 'A', 'B', 'C' };
-    int score[3] = { 5, 6, 7 };
+	string names[3] = { "alice", "bob", "carl" };
+	char ranks[3] = { 'A', 'B', 'C' };
+	int score[3] = { 5, 6, 7 };
 
-    int hoge;
-    auto student0 = tie(names[0], ranks[0], score[0]);
-    // => name: bob, rank: B, score: 6
-    tie(std::ignore, std::ignore, hoge) = student0;
-    cout << "student0> [hoge, score[0], get<2>(student0)] is "
-         << make_tuple(hoge, score[0], get<2>(student0)) << endl;
-    hoge += 10;
-    cout << "            hoge +=   10 => "
-         << make_tuple(hoge, score[0], get<2>(student0)) << endl;
-    score[0] += 100;
-    cout << "        score[0] +=  100 => "
-         << make_tuple(hoge, score[0], get<2>(student0)) << endl;
-    get<2>(student0) += 1000;
-    cout << "get<2>(student0) += 1000 => "
-         << make_tuple(hoge, score[0], get<2>(student0)) << endl;
+	int hoge;
+	auto student0 = tie(names[0], ranks[0], score[0]);
+	// => name: bob, rank: B, score: 6
+	tie(std::ignore, std::ignore, hoge) = student0;
+	cout << "student0> [hoge, score[0], get<2>(student0)] is "
+		 << make_tuple(hoge, score[0], get<2>(student0)) << endl;
+	hoge += 10;
+	cout << "            hoge +=   10 => "
+		 << make_tuple(hoge, score[0], get<2>(student0)) << endl;
+	score[0] += 100;
+	cout << "        score[0] +=  100 => "
+		 << make_tuple(hoge, score[0], get<2>(student0)) << endl;
+	get<2>(student0) += 1000;
+	cout << "get<2>(student0) += 1000 => "
+		 << make_tuple(hoge, score[0], get<2>(student0)) << endl;
 
-    display_separator();
+	display_separator();
 
-    auto student1 = make_tuple(names[1], ranks[1], score[1]);
-    // => name: carl, rank: C, score: 7
-    auto [_1, _2, piyo] = student1;
-    cout << "student1> [piyo, score[1], get<2>(student1)] is "
-         << make_tuple(piyo, score[1], get<2>(student1)) << endl;
-    piyo += 10;
-    cout << "            piyo +=   10 => "
-         << make_tuple(piyo, score[1], get<2>(student1)) << endl;
-    score[1] += 100;
-    cout << "        score[1] +=  100 => "
-         << make_tuple(piyo, score[1], get<2>(student1)) << endl;
-    get<2>(student1) += 1000;
-    cout << "get<2>(student1) += 1000 => "
-         << make_tuple(piyo, score[1], get<2>(student1)) << endl;
+	auto student1 = make_tuple(names[1], ranks[1], score[1]);
+	// => name: carl, rank: C, score: 7
+	auto [_1, _2, piyo] = student1;
+	cout << "student1> [piyo, score[1], get<2>(student1)] is "
+		 << make_tuple(piyo, score[1], get<2>(student1)) << endl;
+	piyo += 10;
+	cout << "            piyo +=   10 => "
+		 << make_tuple(piyo, score[1], get<2>(student1)) << endl;
+	score[1] += 100;
+	cout << "        score[1] +=  100 => "
+		 << make_tuple(piyo, score[1], get<2>(student1)) << endl;
+	get<2>(student1) += 1000;
+	cout << "get<2>(student1) += 1000 => "
+		 << make_tuple(piyo, score[1], get<2>(student1)) << endl;
 
-    display_separator();
+	display_separator();
 
-    auto student2 = tie(names[2], ranks[2], score[2]);
-    // => name: carl, rank: C, score: 7
-    auto [_3, _4, fuga] = student2;
-    cout << "student2> [fuga, score[2], get<2>(student2)] is "
-         << make_tuple(fuga, score[2], get<2>(student2)) << endl;
-    fuga += 10;
-    cout << "            fuga +=   10 => "
-         << make_tuple(fuga, score[2], get<2>(student2)) << endl;
-    score[2] += 100;
-    cout << "        score[2] +=  100 => "
-         << make_tuple(fuga, score[2], get<2>(student2)) << endl;
-    get<2>(student2) += 1000;
-    cout << "get<2>(student2) += 1000 => "
-         << make_tuple(fuga, score[2], get<2>(student2)) << endl;
-    return 0;
+	auto student2 = tie(names[2], ranks[2], score[2]);
+	// => name: carl, rank: C, score: 7
+	auto [_3, _4, fuga] = student2;
+	cout << "student2> [fuga, score[2], get<2>(student2)] is "
+		 << make_tuple(fuga, score[2], get<2>(student2)) << endl;
+	fuga += 10;
+	cout << "            fuga +=   10 => "
+		 << make_tuple(fuga, score[2], get<2>(student2)) << endl;
+	score[2] += 100;
+	cout << "        score[2] +=  100 => "
+		 << make_tuple(fuga, score[2], get<2>(student2)) << endl;
+	get<2>(student2) += 1000;
+	cout << "get<2>(student2) += 1000 => "
+		 << make_tuple(fuga, score[2], get<2>(student2)) << endl;
+	return 0;
 }
 
 // filename: ch1-tuple-example-3.cpp
@@ -189,18 +187,18 @@ int main()
 
 ```plain
 student0> [hoge, score[0], get<2>(student0)] is [5, 5, 5]
-            hoge +=   10 => [15, 5, 5]
-        score[0] +=  100 => [15, 105, 105]
+			hoge +=   10 => [15, 5, 5]
+		score[0] +=  100 => [15, 105, 105]
 get<2>(student0) += 1000 => [15, 1105, 1105]
 --------
 student1> [piyo, score[1], get<2>(student1)] is [6, 6, 6]
-            piyo +=   10 => [16, 6, 6]
-        score[1] +=  100 => [16, 106, 6]
+			piyo +=   10 => [16, 6, 6]
+		score[1] +=  100 => [16, 106, 6]
 get<2>(student1) += 1000 => [16, 106, 1006]
 --------
 student2> [fuga, score[2], get<2>(student2)] is [7, 7, 7]
-            fuga +=   10 => [17, 17, 17]
-        score[2] +=  100 => [117, 117, 117]
+			fuga +=   10 => [17, 17, 17]
+		score[2] +=  100 => [117, 117, 117]
 get<2>(student2) += 1000 => [1117, 1117, 1117]
 ```
 
@@ -226,49 +224,49 @@ void display_separator() { cout << "--------" << endl; }
 
 int main()
 {
-    string names[4] = { "alice", "bob", "carl", "dell" };
-    char ranks[4] = { 'A', 'B', 'C', 'D' };
-    int score[4] = { 5, 6, 7, 8 };
+	string names[4] = { "alice", "bob", "carl", "dell" };
+	char ranks[4] = { 'A', 'B', 'C', 'D' };
+	int score[4] = { 5, 6, 7, 8 };
 
-    cout << std::boolalpha;
+	cout << std::boolalpha;
 
-    int hoge;
-    auto student0 = tie(names[0], ranks[0], score[0]);
-    // => name: bob, rank: B, score: 6
-    tie(std::ignore, std::ignore, hoge) = student0;
-    cout << "0> " << std::is_same<int, decltype(hoge)>::value;
-    cout << ", " << std::is_same<int&, decltype(hoge)>::value << endl;
-    
-    display_separator();
+	int hoge;
+	auto student0 = tie(names[0], ranks[0], score[0]);
+	// => name: bob, rank: B, score: 6
+	tie(std::ignore, std::ignore, hoge) = student0;
+	cout << "0> " << std::is_same<int, decltype(hoge)>::value;
+	cout << ", " << std::is_same<int&, decltype(hoge)>::value << endl;
+	
+	display_separator();
 
-    auto student1 = make_tuple(names[1], ranks[1], score[1]);
-    // => name: carl, rank: C, score: 7
-    auto [_1, _2, piyo] = student1;
-    cout << "1> " << std::is_same<int, decltype(piyo)>::value;
-    cout << ", " << std::is_same<int&, decltype(piyo)>::value << endl;
-    
-    display_separator();
+	auto student1 = make_tuple(names[1], ranks[1], score[1]);
+	// => name: carl, rank: C, score: 7
+	auto [_1, _2, piyo] = student1;
+	cout << "1> " << std::is_same<int, decltype(piyo)>::value;
+	cout << ", " << std::is_same<int&, decltype(piyo)>::value << endl;
+	
+	display_separator();
 
-    auto student2 = tie(names[2], ranks[2], score[2]);
-    // => name: carl, rank: C, score: 7
-    auto [_3, _4, fuga] = student2;
-    cout << "2> " << std::is_same<int, decltype(fuga)>::value;
-    cout << ", " << std::is_same<int&, decltype(fuga)>::value << endl;
-    
-    display_separator();
-    
-    auto student3 = make_tuple(names[2], ranks[2], std::ref(score[2]));
-    // => name: carl, rank: C, score: 7
-    auto [_5, _6, pika] = student3;
-    cout << "3> " << std::is_same<int, decltype(pika)>::value;
-    cout << ", " << std::is_same<int&, decltype(pika)>::value << endl;
-    
-    display_separator();
+	auto student2 = tie(names[2], ranks[2], score[2]);
+	// => name: carl, rank: C, score: 7
+	auto [_3, _4, fuga] = student2;
+	cout << "2> " << std::is_same<int, decltype(fuga)>::value;
+	cout << ", " << std::is_same<int&, decltype(fuga)>::value << endl;
+	
+	display_separator();
+	
+	auto student3 = make_tuple(names[2], ranks[2], std::ref(score[2]));
+	// => name: carl, rank: C, score: 7
+	auto [_5, _6, pika] = student3;
+	cout << "3> " << std::is_same<int, decltype(pika)>::value;
+	cout << ", " << std::is_same<int&, decltype(pika)>::value << endl;
+	
+	display_separator();
 
-    cout << "bonus> "
-         << std::is_same<int&, decltype(std::get<2>(student0))>::value << ", "
-         << std::is_same<int&, decltype(std::get<2>(student1))>::value << endl;
-    return 0;
+	cout << "bonus> "
+		 << std::is_same<int&, decltype(std::get<2>(student0))>::value << ", "
+		 << std::is_same<int&, decltype(std::get<2>(student1))>::value << endl;
+	return 0;
 }
 
 // filename: ch1-tuple-example-4.cpp
@@ -321,46 +319,46 @@ bonus> true, true
 template<class Func, class Tuple, int N>
 struct TupleHelper
 {
-    static void func(Func f, const Tuple &_)
-    {
-        TupleHelper<Func, Tuple, N - 1>::func(f, _);
-        f(std::get<N - 1>(_), N - 1);
-    }
+	static void func(Func f, const Tuple &_)
+	{
+		TupleHelper<Func, Tuple, N - 1>::func(f, _);
+		f(std::get<N - 1>(_), N - 1);
+	}
 };
 
 template<class Func, class Tuple>
 struct TupleHelper<Func, Tuple, 1>
 {
-    static void func(Func f, const Tuple &_)
-    {
-        f(std::get<0>(_), 0);
-    }
+	static void func(Func f, const Tuple &_)
+	{
+		f(std::get<0>(_), 0);
+	}
 };
 
 template<class Func, class ...Args>
 void manipulate_tuple(Func f, const std::tuple<Args...> &_)
 {
-    TupleHelper<Func, decltype(_), sizeof...(Args)>::func(f, _);
+	TupleHelper<Func, decltype(_), sizeof...(Args)>::func(f, _);
 }
 
 template<class ...Args>
 void print_tuple(const std::tuple<Args...> &_)
 {
-    std::cout << "(";
-    manipulate_tuple(
-        [](auto _, std::size_t idx)
-        {
-            if (idx != 0) std::cout << ", ";
-            std::cout << _;
-        }, _);
-    std::cout << ")";
+	std::cout << "(";
+	manipulate_tuple(
+		[](auto _, std::size_t idx)
+		{
+			if (idx != 0) std::cout << ", ";
+			std::cout << _;
+		}, _);
+	std::cout << ")";
 }
 
 int main()
 {
-    print_tuple(std::make_tuple(10, 1.5, 'A'));
-    // => (10, 1.5, A)
-    return 0;
+	print_tuple(std::make_tuple(10, 1.5, 'A'));
+	// => (10, 1.5, A)
+	return 0;
 }
 // filename: ch1-tuple-helper.cpp
 // compile this> g++ ch1-tuple-helper.cpp -o ch1-tuple-helper.exe -std=c++14
@@ -379,49 +377,13 @@ int main()
 
 namespace __utils{
 
-template<class Func, class Tuple, int N>
-struct TupleHelper
-{
-    static void func(Func f, const Tuple &_)
-    {
-        TupleHelper<Func, Tuple, N - 1>::func(f, _);
-        f(std::get<N - 1>(_), N - 1);
-    }
-};
-
-template<class Func, class Tuple>
-struct TupleHelper<Func, Tuple, 1>
-{
-    static void func(Func f, const Tuple &_)
-    {
-        f(std::get<0>(_), 0);
-    }
-};
+/// same as ch1-tuple-helper.cpp
 
 template<class Func>
 void manipulate_tuple(Func f, const std::tuple<> &_)
 {
-    std::cerr << "Warning! Manipulating an EMPTY tuple.";
+	std::cerr << "Warning! Manipulating an EMPTY tuple.";
 };
-
-template<class Func, class ...Args>
-void manipulate_tuple(Func f, const std::tuple<Args...> &_)
-{
-    TupleHelper<Func, decltype(_), sizeof...(Args)>::func(f, _);
-}
-
-template<class ...Args>
-void print_tuple(const std::tuple<Args...> &_)
-{
-    std::cout << "(";
-    manipulate_tuple(
-        [](auto _, std::size_t idx)
-        {
-            if (idx != 0) std::cout << ", ";
-            std::cout << _;
-        }, _);
-    std::cout << ")";
-}
 
 } // namespace __utils
 #endif // __TUPLE_UTILS_HPP__
@@ -438,24 +400,24 @@ void print_tuple(const std::tuple<Args...> &_)
 
 int main()
 {
-    auto t1 = std::make_tuple(10, "abc", 'B', 32);
-    int n = 11;
-    auto t2 = std::make_tuple("bcd", 'C', 64);
-    auto t3 = std::tuple_cat(t1, std::tie(n), t2, std::make_pair("abc", "def"));
-    n = 16;
-    __utils::print_tuple(t3); std::cout << std::endl;
-    // => (10, abc, B, 32, 16, bcd, C, 64, abc, def)
+	auto t1 = std::make_tuple(10, "abc", 'B', 32);
+	int n = 11;
+	auto t2 = std::make_tuple("bcd", 'C', 64);
+	auto t3 = std::tuple_cat(t1, std::tie(n), t2, std::make_pair("abc", "def"));
+	n = 16;
+	__utils::print_tuple(t3); std::cout << std::endl;
+	// => (10, abc, B, 32, 16, bcd, C, 64, abc, def)
 
-    std::cout << std::tuple_size<decltype(t3)>::value << std::endl;
-    // => 10
+	std::cout << std::tuple_size<decltype(t3)>::value << std::endl;
+	// => 10
 
-    std::tuple_element<1, decltype(t3)>::type hoge = "test";
-    std::cout << hoge << std::endl; // => "test"
+	std::tuple_element<1, decltype(t3)>::type hoge = "test";
+	std::cout << hoge << std::endl; // => "test"
 
-    std::tuple<> t_empty;
-    __utils::print_tuple(t_empty);
-    // => (Warning! Manipulating an EMPTY tuple.)
-    return 0;
+	std::tuple<> t_empty;
+	__utils::print_tuple(t_empty);
+	// => (Warning! Manipulating an EMPTY tuple.)
+	return 0;
 }
 
 // filename: ch1-tuple-tools.cpp
@@ -485,27 +447,27 @@ last [5, 4, 3, 2, 1] -- => 1
 template<typename T, typename ...Ts>
 auto head(std::tuple<T, Ts...> t)
 {
-    return std::get<0>(t);
+	return std::get<0>(t);
 }
 
 template<std::size_t ...Ns, typename ...Ts>
 auto tail_impl(std::index_sequence<Ns...>, std::tuple<Ts...> t)
 {
-    return std::make_tuple(std::get<Ns + 1u>(t)...);
+	return std::make_tuple(std::get<Ns + 1u>(t)...);
 }
 
 template <typename ...Ts>
 auto tail(std::tuple<Ts...> t)
 {
-    return tail_impl(std::make_index_sequence<sizeof...(Ts) - 1u>() , t);
+	return tail_impl(std::make_index_sequence<sizeof...(Ts) - 1u>() , t);
 }
 
 int main()
 {
-    auto t = std::make_tuple(2, 3.14, 'c');
-    std::cout << head(t) << std::endl; // => 2
-    __utils::print_tuple(tail(t)); std::cout << std::endl; // => (3.14, 'c')
-    return 0;
+	auto t = std::make_tuple(2, 3.14, 'c');
+	std::cout << head(t) << std::endl; // => 2
+	__utils::print_tuple(tail(t)); std::cout << std::endl; // => (3.14, 'c')
+	return 0;
 }
 
 // filename: ch1-tuple-head-and-tail.cpp
@@ -524,41 +486,41 @@ int main()
 template<std::size_t ...Ns, typename ...Ts>
 auto init_impl(std::index_sequence<Ns...>, std::tuple<Ts...> t)
 {
-    return std::make_tuple(std::get<Ns>(t)...);
+	return std::make_tuple(std::get<Ns>(t)...);
 }
 
 template<typename ...Ts>
 auto init(std::tuple<Ts...> t)
 {
-    return init_impl(std::make_index_sequence<sizeof...(Ts) - 1u>() , t);
+	return init_impl(std::make_index_sequence<sizeof...(Ts) - 1u>() , t);
 }
 
 template<typename ...Ts>
 auto last(std::tuple<Ts...> t)
 {
-    return std::get<sizeof...(Ts) - 1u>(t);
+	return std::get<sizeof...(Ts) - 1u>(t);
 }
 
 template <class T>
 auto size(T t)
 {
-    return std::tuple_size<T>::value;
+	return std::tuple_size<T>::value;
 }
 
 template <class T>
 auto last2(T t)
 {
-    return std::get<std::tuple_size<T>::value - 1u>(t);
+	return std::get<std::tuple_size<T>::value - 1u>(t);
 }
 
 int main()
 {
-    auto t = std::make_tuple(2, 3.14, 'c');
-    std::cout << size(t) << std::endl; // => 3
-    std::cout << last(t) << std::endl; // => 'c'
-    std::cout << last2(t) << std::endl; // => 'c'
-    __utils::print_tuple(init(t)); std::cout << std::endl; // => (2, 3.14)
-    return 0;
+	auto t = std::make_tuple(2, 3.14, 'c');
+	std::cout << size(t) << std::endl; // => 3
+	std::cout << last(t) << std::endl; // => 'c'
+	std::cout << last2(t) << std::endl; // => 'c'
+	__utils::print_tuple(init(t)); std::cout << std::endl; // => (2, 3.14)
+	return 0;
 }
 
 // filename: ch1-tuple-init-and-last.cpp
@@ -570,7 +532,7 @@ int main()
 ```cpp
 template <class T> auto last2(T t)
 {
-    return std::get<size<T>(t) - 1u>(t);
+	return std::get<size<T>(t) - 1u>(t);
 }
 ```
 
