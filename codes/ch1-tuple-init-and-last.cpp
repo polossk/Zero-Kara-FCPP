@@ -23,12 +23,6 @@ auto last(std::tuple<Ts...> t)
 }
 
 template <class T>
-constexpr std::size_t size(T t) 
-{
-    return std::tuple_size<T>::value;
-}
-
-template <class T>
 auto size(T t)
 {
     return std::tuple_size<T>::value;
