@@ -22,5 +22,5 @@ int main()
     return 0;
 }
 
-// filename: ch3-citizens-example-1.cpp
-// compile this> g++ ch3-citizens-example-1.cpp -o ch3-citizens-example-1.exe
+// filename: ch3-citizens-example.cpp
+// compile this> g++ ch3-citizens-example.cpp -o ch3-citizens-example.exe
