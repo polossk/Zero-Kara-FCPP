@@ -44,8 +44,8 @@ int main()
     return 0;
 }
 
-// filename: ch3-citizens-example-1.cpp
-// compile this> g++ ch3-citizens-example-1.cpp -o ch3-citizens-example-1.exe
+// filename: ch3-citizens-example.cpp
+// compile this> g++ ch3-citizens-example.cpp -o ch3-citizens-example-1.exe
 ```
 
 在这个例子里，我们使用了标准库所提供的 `std::map` 这一数据结构来存储我们的核心匹配关系，即一个运算符对应一个运算关系。`map` 所储存的数据现在不再是实实在在的数字，而是一个具体的函数，一种具体的运算方法。这便是刚才所提到的公民权利的第一条和第三条。那么第二条，作为右值参与计算或参与更高级的函数调用，又应该怎么解释呢。这就要提到所有生成自己支持函数式编程或类函数式编程的最基础的三个工具了：map，filter，fold。
