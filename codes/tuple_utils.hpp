@@ -1,7 +1,6 @@
 // filename: tuple_utils.hpp
 #ifndef __TUPLE_UTILS_HPP__
 #define __TUPLE_UTILS_HPP__
-
 namespace __utils{
 
 template<class Func, class Tuple, int N>

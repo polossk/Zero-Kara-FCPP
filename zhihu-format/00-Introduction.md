@@ -1,5 +1,17 @@
-从零开始的简单函数式C++（〇）前言
+从零开始的简单函数式C++（〇）前言&目录
 ========================================
+
+## 目录
+
+为了方便整理和查找，我把整个系列的目录和每一篇里涉及到的主要内容放在这里，供大家使用。
+
+* [从零开始的简单函数式C++（〇）前言](https://zhuanlan.zhihu.com/p/44772722)
+* [从零开始的简单函数式C++（一）pair](https://zhuanlan.zhihu.com/p/44774845)，主要涉及内容：pair
+* [从零开始的简单函数式C++（二）tuple](https://zhuanlan.zhihu.com/p/44774845)，主要涉及内容：tuple，tuple 的展开，tuple 的逐项应用，tuple 版本的 head，tail，init，last
+* [从零开始的简单函数式C++（三）vector](https://zhuanlan.zhihu.com/p/45208774)，主要涉及内容：vector
+* [从零开始的简单函数式C++（四）lambda 函数](https://zhuanlan.zhihu.com/p/45430715)，主要涉及内容：lambda 函数，Y-组合子（不动点组合子）
+* [从零开始的简单函数式C++（五）函数式编程工具箱](https://zhuanlan.zhihu.com/p/45750387)，主要涉及内容：map（for_each，transform），filter（copy_if，remove_if），reduce（accumulate）
+* [从零开始的简单函数式C++（六）更多的函数](https://zhuanlan.zhihu.com/p/46737243)，主要涉及内容：函数的部分应用，tuple_apply，函数类型识别 function_traits
 
 ## 写在最前
 
@@ -32,3 +44,7 @@
 另外，为什么选择 C++ 而不是现在更流行的 python 呢？这里有我自己的一点考虑，个人认为如果平时 python 用的很多，或者任何一门语言用的很多，自然而言地对这门语言中那些从函数式借鉴来的精华耳濡目染，深有体会，更无需他人指点，只需要借助一本 cppreference 就能轻松地将自己的代码转换成现代风格的 C++。毕竟这世上的编程语言五花八门，而实实在在的编程思想早已深入骨髓。
 
 说这么多，让我们现在就，从零开始，去写简单易懂的函数式的 C++。
+
+## 其他需要说明的
+
+这个东西还挂在了 github 上，欢迎大家加入催更大军 emmm
