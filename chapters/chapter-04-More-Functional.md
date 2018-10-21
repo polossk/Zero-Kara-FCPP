@@ -524,12 +524,14 @@ template <class Return, class Arg, class... Args>
 auto curry_impl(std::function<Return(Arg, Args...)> && f)
 {
     return [f = std::forward<decltype(f)>(f)](Arg arg)
+    auto _f = [f = std::forward<decltype(f)>(f)](Arg arg)
     {
         std::function<Return(Args...)> rest
             = [f = std::forward<decltype(f)>(f), arg=std::forward<Arg>(arg)]
             (Args... args)->Return { return f(arg, args...); };
         return curry_impl(std::forward<decltype(rest)>(rest));
     };
+    return __utils::make_func(_f);
 }
 ```
 
