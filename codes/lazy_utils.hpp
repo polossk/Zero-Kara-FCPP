@@ -6,9 +6,9 @@ namespace __utils{
 template <typename T> class lazy
 {
 private:
-    bool initialized_;
     T value_;
     std::function<T()> policy_;
+    bool initialized_;
     static T default_policy()
     {
         throw std::runtime_error("No lazy initiation policy given.");
@@ -36,6 +36,8 @@ public:
     }
 
     T& operator()() { return get_value(); }
+
+    operator T() { return get_value(); }
 };
 
 
