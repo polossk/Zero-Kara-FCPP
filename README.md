@@ -7,6 +7,4 @@
 * [x] [函数式编程工具箱](chapters/chapter-03-Functional-Tools.md)
 * [x] [更多的函数](chapters/chapter-04-More-Functional.md)
 * [x] [C++ 的元编程](chapters/chapter-05-CPP-Metaprogram.md)
-* [ ] [杂项](chapters/chapter-06-Misc.md)
-* [ ] 是否需要引入 lazy 求值
-* [ ] 递归与状态变换
+* [x] [杂项](chapters/chapter-06-Misc.md)
