@@ -3,8 +3,6 @@
 
 [![CC-BY-NC-SA-4.0](https://i.creativecommons.org/l/by-nc-sa/4.0/88x31.png)](https://creativecommons.org/licenses/by-nc-sa/4.0/)
 
-## 标题
-
 如标题所示，这个教程主要是讲解如何用现代的 C++ 以及所配套的 STL 来“函数式”地编程。具体而言，本教程会讲解以下内容：
 
 * STL 中的主要工具：元组 `pair`，`tuple`，向量 `vector`
