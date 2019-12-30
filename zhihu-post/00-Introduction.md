@@ -54,4 +54,4 @@
 
 ## 其他需要说明的
 
-这个东西还挂在了 github 上，欢迎大家加入催更大军 emmm
+这个东西还挂在了 github 上 [polossk/Zero-Kara-FCPP](https://github.com/polossk/Zero-Kara-FCPP) 上，欢迎大家加入催更大军 emmm
